@@ -63,7 +63,7 @@ while dirs != []:
     for k in foundDirs:
         dirs.append(d + k)
 
-# TODO: Download all files with their respective architecteur
+# Download all files with their respective architecteur
 for f in files:
     lf = f.split('/')
     
