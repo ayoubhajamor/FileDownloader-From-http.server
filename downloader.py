@@ -1,6 +1,15 @@
+import os
 import sys
 import requests
 from bs4 import BeautifulSoup
+from pathlib import Path
+
+p = Path(os.getcwd())
+DownloadP = p / "Downloaded"
+# Make the directory that files will be downloaded into
+os.makedirs(DownloadP, exist_ok=True)
+# cd 
+os.chdir(DownloadP)
 
 if len(sys.argv) <= 2:
     print(f"Usage : {sys.argv[0]} <host> <port>")
@@ -17,6 +26,7 @@ if r.status_code != 200:
 
 html_doc = r.text
 soup = BeautifulSoup(html_doc, 'html.parser')
+
 for a in soup.find_all('a'):
     data = requests.get(f"{url}/{a['href']}")
     if "text" in data.headers['Content-type']:
