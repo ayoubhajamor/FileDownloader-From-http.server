@@ -24,8 +24,8 @@ def getFilesAndDirs(html):
             files.append(a['href'])
     return files, dirs
 
-def getFile(url, name):
-    return requests.get(f"{url}/{name}")
+def getHtml(url, name):
+    return requests.get(f"{url}/{name}").text
 
 p = Path(os.getcwd())
 DownloadP = p / "Downloaded"
@@ -50,13 +50,16 @@ html_doc = r.text
 files, dirs = getFilesAndDirs(html_doc)
 
 
-while True:
-    while files != []:
-        name = files.pop()
-        data = getFile(url, name)
-        createFile(DownloadP , data, name)
+# Go inside each dir and find all its files
+while dirs != []:
+    d = dirs.pop()
+    data = getHtml(url, d)
+    foundFiles, foundDirs = getFilesAndDirs(data)
 
-    # TODO: Go inside each dir and download all its files
-    break
+    # Append foundFiles to files
+    for f in foundFiles:
+        files.append(d + f)
+    for k in foundDirs:
+        dirs.append(d + k)
 
-
+# TODO: Download all files with their respective architecteur
