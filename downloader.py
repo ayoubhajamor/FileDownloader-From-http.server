@@ -4,21 +4,33 @@ import requests
 from bs4 import BeautifulSoup
 from pathlib import Path
 
-def createFile(data, a):
+def createFile(path , data, name):
     if "text" in data.headers['Content-type']:
-        with open(a['href'], 'w') as f:
+        with open(path / name, 'w') as f:
             f.write(data.text)
     else:
-        with open(a['href'], 'wb') as f:
+        with open(path / name, 'wb') as f:
             f.write(data.content)
-    print(f"{a['href']} created.")
+    print(f"{path}/{name} created.")
+
+def getFilesAndDirs(html):
+    soup = BeautifulSoup(html, 'html.parser')
+    files = []
+    dirs = []
+    for a in soup.find_all('a'):
+        if a['href'].endswith('/'):
+            dirs.append(a['href'])
+        else:
+            files.append(a['href'])
+    return files, dirs
+
+def getFile(url, name):
+    return requests.get(f"{url}/{name}")
 
 p = Path(os.getcwd())
 DownloadP = p / "Downloaded"
 # Make the directory that files will be downloaded into
 os.makedirs(DownloadP, exist_ok=True)
-# cd 
-os.chdir(DownloadP)
 
 if len(sys.argv) <= 2:
     print(f"Usage : {sys.argv[0]} <host> <port>")
@@ -34,8 +46,17 @@ if r.status_code != 200:
     sys.exit()
 
 html_doc = r.text
-soup = BeautifulSoup(html_doc, 'html.parser')
 
-for a in soup.find_all('a'):
-    data = requests.get(f"{url}/{a['href']}")
-    createFile(data, a)
+files, dirs = getFilesAndDirs(html_doc)
+
+
+while True:
+    while files != []:
+        name = files.pop()
+        data = getFile(url, name)
+        createFile(DownloadP , data, name)
+
+    # TODO: Go inside each dir and download all its files
+    break
+
+
