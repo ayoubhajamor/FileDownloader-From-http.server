@@ -11,7 +11,7 @@ def createFile(path , data, name):
     else:
         with open(path / name, 'wb') as f:
             f.write(data.content)
-    print(f"{path}/{name} created.")
+    print(f"./{path}/{name} created.")
 
 def getFilesAndDirs(html):
     soup = BeautifulSoup(html, 'html.parser')
@@ -26,9 +26,10 @@ def getFilesAndDirs(html):
 
 def getHtml(url, name):
     return requests.get(f"{url}/{name}").text
+def getResponse(url):
+    return requests.get(url)
 
-p = Path(os.getcwd())
-DownloadP = p / "Downloaded"
+DownloadP = Path('.') / "Downloaded"
 # Make the directory that files will be downloaded into
 os.makedirs(DownloadP, exist_ok=True)
 
@@ -63,3 +64,29 @@ while dirs != []:
         dirs.append(d + k)
 
 # TODO: Download all files with their respective architecteur
+for f in files:
+    lf = f.split('/')
+    
+    # Get filename
+    name = lf.pop(-1)
+    if len(lf) == 0:
+        dpath = ''
+    else:
+        dpath = '/'.join(lf)
+    target_dir = DownloadP / dpath
+    # Creating dir
+    target_dir.mkdir(parents=True, exist_ok=True)
+    
+    # cd into target dir
+    # os.chdir(target_dir)
+    
+    # set file url
+    if dpath == '':
+        file_url = url + '/' + name
+    else:
+        file_url = url + '/' + dpath + '/' + name
+
+    # Download file
+    data = getResponse(file_url)
+    
+    createFile(target_dir, data, name)
